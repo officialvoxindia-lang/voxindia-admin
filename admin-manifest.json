@@ -1,4 +1,3 @@
-
 {
   "id": "./index.html",
   "name": "VoxIndia Admin Panel",
@@ -24,5 +23,8 @@
       "type": "image/png",
       "purpose": "any"
     }
+  ],
+  "categories": [
+    "news"
   ]
 }
