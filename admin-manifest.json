@@ -1,3 +1,4 @@
+
 {
   "id": "./index.html",
   "name": "VoxIndia Admin Panel",
@@ -12,19 +13,16 @@
   "theme_color": "#e53935",
   "icons": [
     {
-      "src": "./icons/admin-icon-192.png",
+      "src": "./Logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icons/admin-icon-512.png",
+      "src": "./Logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     }
-  ],
-  "categories": [
-    "news"
   ]
 }
