@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>VoxIndia Admin Panel</title>
+  <style>
+    :root{font-family:Arial,Helvetica,sans-serif;color:#172033;background:#f3f5f9}
+    *{box-sizing:border-box}
+    body{margin:0}
+    header{background:#101827;color:#fff;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    header h1{font-size:21px;margin:0}
+    header p{font-size:12px;color:#cbd5e1;margin:5px 0 0}
+    main{max-width:1050px;margin:22px auto;padding:0 14px 40px}
+    .card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 3px 12px #0f172a0a}
+    h2{font-size:18px;margin:0 0 14px}
+    label{display:block;font-weight:700;font-size:13px;margin:12px 0 6px}
+    input,textarea,select{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:11px 12px;font:inherit;font-size:14px;background:#fff;color:#172033}
+    textarea{min-height:105px;resize:vertical}
+    input:focus,textarea:focus,select:focus{outline:2px solid #93c5fd;border-color:#2563eb}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+    .checkrow{display:flex;align-items:center;gap:9px;margin-top:14px;flex-wrap:wrap}
+    .checkrow input{width:auto}
+    .checkrow label{margin:0;font-weight:600}
+    button{border:0;border-radius:9px;padding:11px 15px;font-weight:700;font-size:14px;cursor:pointer}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .primary{background:#155eef;color:#fff}
+    .dark{background:#243247;color:#fff}
+    .danger{background:#fee2e2;color:#991b1b}
+    .light{background:#e8eef7;color:#1e293b}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+    .hidden{display:none!important}
+    .notice{padding:11px 13px;border-radius:9px;margin:0 0 14px;font-size:13px;line-height:1.5}
+    .info{background:#eff6ff;color:#1e40af}
+    .error{background:#fef2f2;color:#991b1b}
+    .success{background:#ecfdf5;color:#065f46}
+    .muted{color:#64748b;font-size:13px;line-height:1.5}
+    .newsitem{border:1px solid #e2e8f0;border-radius:11px;padding:14px;margin-top:11px}
+    .newshead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .newshead h3{font-size:16px;margin:0 0 6px;overflow-wrap:anywhere}
+    .meta{font-size:12px;color:#64748b;line-height:1.6}
+    .pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#eaf1ff;color:#1d4ed8;font-size:11px;font-weight:700;margin:2px}
+    .breaking{background:#fee2e2;color:#b91c1c}
+    .published{background:#dcfce7;color:#166534}
+    .unpublished{background:#f1f5f9;color:#475569}
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    #loginBox{max-width:500px;margin:50px auto;text-align:center}
+    #loginBox .muted{margin-bottom:18px}
+    #userEmail{font-size:13px;color:#cbd5e1}
+    .small{font-size:12px}
+    @media(max-width:650px){.grid{grid-template-columns:1fr}header{padding:15px}main{margin-top:14px}.card{padding:14px}}
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>VoxIndia Admin Panel</h1>
+    <p>News Management Dashboard</p>
+  </div>
+  <div id="headerUser" class="hidden">
+    <div id="userEmail"></div>
+    <button id="logoutBtn" class="light" type="button">Logout</button>
+  </div>
+</header>
+
+<main>
+  <section id="loginBox" class="card">
+    <h2>Admin Login</h2>
+    <p class="muted">केवल अधिकृत VoxIndia Admin Google Accounts से प्रवेश मिलेगा।</p>
+    <div id="loginMessage" class="notice info hidden" role="status"></div>
+    <button id="loginBtn" class="primary" type="button">Google से Login करें</button>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div id="appMessage" class="notice hidden" role="status"></div>
+
+    <section class="card">
+      <div class="topline">
+        <h2 id="formHeading">नई News Publish करें</h2>
+        <span class="pill">Firebase: voxindia-77b87</span>
+      </div>
+      <form id="newsForm">
+        <label for="newsType">News का प्रकार</label>
+        <select id="newsType" required>
+          <option value="text">Text News</option>
+          <option value="short">YouTube Shorts / Reel</option>
+          <option value="full">Full YouTube Video</option>
+          <option value="inline">News के बीच YouTube Video</option>
+        </select>
+
+        <div class="grid">
+          <div>
+            <label for="newsTitle">Title / Headline *</label>
+            <input id="newsTitle" maxlength="180" required placeholder="खबर का शीर्षक लिखें">
+          </div>
+          <div>
+            <label for="newsCategory">Category</label>
+            <input id="newsCategory" maxlength="60" placeholder="जैसे: भारत, राजनीति, खेल" value="General">
+          </div>
+        </div>
+
+        <label for="newsContent">News Details / Description</label>
+        <textarea id="newsContent" maxlength="20000" placeholder="खबर की पूरी जानकारी लिखें"></textarea>
+
+        <div id="youtubeGroup" class="hidden">
+          <label for="youtubeUrl">YouTube Video Link *</label>
+          <input id="youtubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=...">
+          <p class="muted small">YouTube का पूरा लिंक डालें। वीडियो YouTube पर ही रहेगा; Firebase पर upload नहीं होगा।</p>
+        </div>
+
+        <div class="checkrow">
+          <input id="breakingCheck" type="checkbox">
+          <label for="breakingCheck">Breaking News</label>
+          <input id="publishedCheck" type="checkbox" checked>
+          <label for="publishedCheck">अभी Publish करें</label>
+        </div>
+
+        <div class="actions">
+          <button id="saveBtn" class="primary" type="submit">Publish News</button>
+          <button id="cancelEditBtn" class="light hidden" type="button">Edit रद्द करें</button>
+          <button id="resetBtn" class="light" type="reset">Form साफ करें</button>
+        </div>
+        <p class="muted small">* Title जरूरी है। Shorts, Full Video और Inline Video के लिए YouTube link जरूरी है।</p>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="topline">
+        <h2>Published / Saved News</h2>
+        <button id="refreshBtn" class="light" type="button">Refresh</button>
+      </div>
+      <p class="muted">यह सूची Firestore की <b>news</b> collection से आती है।</p>
+      <div id="newsList"><p class="muted">News लोड हो रही हैं...</p></div>
+    </section>
+  </section>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+    onSnapshot, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // VoxIndia का मौजूदा Firebase Web Configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBLRtN-Q15B0EeXfe4gyu50YZTGull-kzU",
+    authDomain: "voxindia-77b87.firebaseapp.com",
+    databaseURL: "https://voxindia-77b87-default-rtdb.firebaseio.com",
+    projectId: "voxindia-77b87",
+    storageBucket: "voxindia-77b87.firebasestorage.app",
+    messagingSenderId: "475424283766",
+    appId: "1:475424283766:web:d86af5966be9578f3d9357",
+    measurementId: "G-2HZL7BG9FG"
+  };
+
+  // केवल इन दो Google accounts को Admin UI में प्रवेश मिलेगा।
+  const ADMIN_EMAILS = [
+    "official.voxindia@gmail.com",
+    "voxindia.support@gmail.com"
+  ];
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+
+  const $ = (id) => document.getElementById(id);
+  const loginBox = $("loginBox");
+  const dashboard = $("dashboard");
+  const loginBtn = $("loginBtn");
+  const logoutBtn = $("logoutBtn");
+  const form = $("newsForm");
+  const typeInput = $("newsType");
+  const titleInput = $("newsTitle");
+  const categoryInput = $("newsCategory");
+  const contentInput = $("newsContent");
+  const youtubeInput = $("youtubeUrl");
+  const youtubeGroup = $("youtubeGroup");
+  const breakingInput = $("breakingCheck");
+  const publishedInput = $("publishedCheck");
+  const saveBtn = $("saveBtn");
+  const cancelEditBtn = $("cancelEditBtn");
+  const newsList = $("newsList");
+
+  let editingId = null;
+  let newsCache = [];
+  let unsubscribeNews = null;
+  let busy = false;
+
+  function showMessage(target, message, kind = "info") {
+    target.textContent = message;
+    target.className = "notice " + kind;
+    target.classList.remove("hidden");
+  }
+  function clearMessage(target) {
+    target.textContent = "";
+    target.classList.add("hidden");
+  }
+  function setBusy(value) {
+    busy = value;
+    saveBtn.disabled = value;
+    loginBtn.disabled = value;
+    saveBtn.textContent = value ? "कृपया प्रतीक्षा करें..." : (editingId ? "Changes Save करें" : "Publish News");
+  }
+  function isAdmin(user) {
+    return !!user && !!user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
+  }
+  function updateTypeFields() {
+    const needsYoutube = ["short", "full", "inline"].includes(typeInput.value);
+    youtubeGroup.classList.toggle("hidden", !needsYoutube);
+    youtubeInput.required = needsYoutube;
+    if (typeInput.value === "short") {
+      contentInput.placeholder = "Short की छोटी जानकारी (वैकल्पिक)";
+    } else if (typeInput.value === "full") {
+      contentInput.placeholder = "Full video का विवरण (वैकल्पिक)";
+    } else {
+      contentInput.placeholder = "खबर की पूरी जानकारी लिखें";
+    }
+  }
+  function resetForm() {
+    editingId = null;
+    form.reset();
+    categoryInput.value = "General";
+    publishedInput.checked = true;
+    $("formHeading").textContent = "नई News Publish करें";
+    cancelEditBtn.classList.add("hidden");
+    saveBtn.textContent = "Publish News";
+    updateTypeFields();
+  }
+  function safeDate(value) {
+    if (!value) return "तारीख उपलब्ध नहीं";
+    try {
+      const date = typeof value.toDate === "function" ? value.toDate() : new Date(value);
+      return Number.isNaN(date.getTime()) ? "तारीख उपलब्ध नहीं" : date.toLocaleString("hi-IN");
+    } catch {
+      return "तारीख उपलब्ध नहीं";
+    }
+  }
+  function makeElement(tag, className, text) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text !== undefined) el.textContent = text;
+    return el;
+  }
+  function renderNews() {
+    newsList.replaceChildren();
+    if (!newsCache.length) {
+      newsList.append(makeElement("p", "muted", "अभी news collection में कोई खबर नहीं है।"));
+      return;
+    }
+    for (const item of newsCache) {
+      const card = makeElement("article", "newsitem");
+      const head = makeElement("div", "newshead");
+      const left = document.createElement("div");
+      left.append(makeElement("h3", "", item.title || item.headline || "बिना शीर्षक"));
+      left.append(makeElement("div", "meta", `${item.category || "General"} • ${safeDate(item.createdAt)}`));
+      const badges = document.createElement("div");
+      const typeNames = {text:"Text News",short:"YouTube Shorts",full:"Full Video",inline:"Inline Video"};
+      badges.append(makeElement("span", "pill", typeNames[item.videoType] || item.videoType || "Text News"));
+      badges.append(makeElement("span", "pill " + (item.breaking === true ? "breaking" : ""), item.breaking === true ? "BREAKING" : "Normal"));
+      badges.append(makeElement("span", "pill " + (item.published === false ? "unpublished" : "published"), item.published === false ? "Unpublished" : "Published"));
+      left.append(badges);
+      head.append(left);
+      card.append(head);
+
+      if (item.content || item.text || item.description) {
+        const desc = makeElement("p", "muted", item.content || item.text || item.description);
+        desc.style.whiteSpace = "pre-wrap";
+        card.append(desc);
+      }
+      const videoUrl = item.youtubeUrl || item.youtubeLink || item.videoUrl || item.videoLink || item.youtube || item.video;
+      if (videoUrl) {
+        const link = makeElement("a", "small", "YouTube link खोलें");
+        link.href = videoUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        card.append(link);
+      }
+
+      const actions = makeElement("div", "actions");
+      const edit = makeElement("button", "light", "Edit");
+      edit.type = "button";
+      edit.addEventListener("click", () => beginEdit(item.id));
+      const remove = makeElement("button", "danger", "Delete");
+      remove.type = "button";
+      remove.addEventListener("click", () => removeNews(item.id, item.title || item.headline || "यह खबर"));
+      actions.append(edit, remove);
+      card.append(actions);
+      newsList.append(card);
+    }
+  }
+
+  function beginEdit(id) {
+    const item = newsCache.find(n => n.id === id);
+    if (!item) return;
+    editingId = id;
+    typeInput.value = item.videoType || item.contentType || item.videoKind || item.format || item.type || (item.isShort ? "short" : item.isFullVideo ? "full" : item.youtubeUrl ? "inline" : "text");
+    if (!["text","short","full","inline"].includes(typeInput.value)) typeInput.value = "text";
+    titleInput.value = item.title || item.headline || "";
+    categoryInput.value = item.category || "General";
+    contentInput.value = item.content || item.text || item.description || "";
+    youtubeInput.value = item.youtubeUrl || item.youtubeLink || item.videoUrl || item.videoLink || item.youtube || item.video || "";
+    breakingInput.checked = item.breaking === true;
+    publishedInput.checked = item.published !== false;
+    $("formHeading").textContent = "News Edit करें";
+    cancelEditBtn.classList.remove("hidden");
+    saveBtn.textContent = "Changes Save करें";
+    updateTypeFields();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function validYoutubeUrl(raw) {
+    if (!raw) return false;
+    try {
+      const url = new URL(raw);
+      const host = url.hostname.toLowerCase().replace(/^www\./, "");
+      if (host === "youtu.be") return url.pathname.length > 1;
+      if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+        return url.pathname === "/watch" ? !!url.searchParams.get("v") :
+          /^\/(shorts|embed|live)\/[^/]+/.test(url.pathname);
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
+  async function saveNews(event) {
+    event.preventDefault();
+    if (busy || !isAdmin(auth.currentUser)) {
+      showMessage($("appMessage"), "Admin अनुमति नहीं है। कृपया अधिकृत अकाउंट से Login करें।", "error");
+      return;
+    }
+    const title = titleInput.value.trim();
+    const category = categoryInput.value.trim() || "General";
+    const content = contentInput.value.trim();
+    const videoType = typeInput.value;
+    const youtubeUrl = youtubeInput.value.trim();
+
+    if (!title) {
+      showMessage($("appMessage"), "कृपया News का Title लिखें।", "error");
+      titleInput.focus();
+      return;
+    }
+    if (["short","full","inline"].includes(videoType) && !validYoutubeUrl(youtubeUrl)) {
+      showMessage($("appMessage"), "कृपया सही YouTube video link डालें।", "error");
+      youtubeInput.focus();
+      return;
+    }
+
+    const data = {
+      title,
+      content,
+      category,
+      videoType,
+      breaking: breakingInput.checked,
+      published: publishedInput.checked,
+      updatedAt: serverTimestamp()
+    };
+    if (["short","full","inline"].includes(videoType)) data.youtubeUrl = youtubeUrl;
+    else data.youtubeUrl = "";
+
+    setBusy(true);
+    clearMessage($("appMessage"));
+    try {
+      if (editingId) {
+        await updateDoc(doc(db, "news", editingId), data);
+        showMessage($("appMessage"), "News सफलतापूर्वक Update हो गई।", "success");
+      } else {
+        data.createdAt = serverTimestamp();
+        await addDoc(collection(db, "news"), data);
+        showMessage($("appMessage"), publishedInput.checked ? "News सफलतापूर्वक Publish हो गई।" : "News Unpublished रूप में Save हो गई।", "success");
+      }
+      resetForm();
+    } catch (error) {
+      console.error("Save news error:", error);
+      showMessage($("appMessage"), "News Save नहीं हुई। Firebase Firestore Rules और Admin अनुमति जाँचें। विवरण: " + (error.code || error.message || "Unknown error"), "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeNews(id, title) {
+    if (!isAdmin(auth.currentUser)) {
+      showMessage($("appMessage"), "Admin अनुमति नहीं है।", "error");
+      return;
+    }
+    if (!window.confirm(`क्या "${title}" को हमेशा के लिए Delete करना है?`)) return;
+    try {
+      await deleteDoc(doc(db, "news", id));
+      if (editingId === id) resetForm();
+      showMessage($("appMessage"), "News Delete हो गई।", "success");
+    } catch (error) {
+      console.error("Delete news error:", error);
+      showMessage($("appMessage"), "News Delete नहीं हुई। Firestore Rules जाँचें। विवरण: " + (error.code || error.message || "Unknown error"), "error");
+    }
+  }
+
+  function startNewsListener() {
+    if (unsubscribeNews) unsubscribeNews();
+    newsList.textContent = "News लोड हो रही हैं...";
+    unsubscribeNews = onSnapshot(collection(db, "news"), (snapshot) => {
+      newsCache = snapshot.docs.map(d => ({id:d.id, ...d.data()}));
+      newsCache.sort((a,b) => {
+        const aTime = a.createdAt && typeof a.createdAt.toMillis === "function" ? a.createdAt.toMillis() : 0;
+        const bTime = b.createdAt && typeof b.createdAt.toMillis === "function" ? b.createdAt.toMillis() : 0;
+        return bTime - aTime;
+      });
+      renderNews();
+    }, (error) => {
+      console.error("News listener error:", error);
+      newsList.textContent = "News लोड नहीं हुई। Firestore Rules में Admin को news collection पढ़ने की अनुमति जाँचें। " + (error.code || error.message || "");
+    });
+  }
+
+  loginBtn.addEventListener("click", async () => {
+    clearMessage($("loginMessage"));
+    loginBtn.disabled = true;
+    try {
+      const result = await signInWithPopup(auth, provider);
+      if (!isAdmin(result.user)) {
+        await signOut(auth);
+        showMessage($("loginMessage"), "यह Gmail Admin सूची में नहीं है। सही Admin Google Account चुनें।", "error");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      showMessage($("loginMessage"), "Login नहीं हुआ। Google Authentication और Authorized Domains जाँचें। विवरण: " + (error.code || error.message || "Unknown error"), "error");
+    } finally {
+      loginBtn.disabled = false;
+    }
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      if (unsubscribeNews) { unsubscribeNews(); unsubscribeNews = null; }
+      await signOut(auth);
+      resetForm();
+    } catch (error) {
+      showMessage($("appMessage"), "Logout में समस्या: " + (error.code || error.message || "Unknown error"), "error");
+    }
+  });
+
+  typeInput.addEventListener("change", updateTypeFields);
+  form.addEventListener("submit", saveNews);
+  form.addEventListener("reset", () => setTimeout(() => {
+    if (!editingId) {
+      categoryInput.value = "General";
+      publishedInput.checked = true;
+    }
+    updateTypeFields();
+  }, 0));
+  cancelEditBtn.addEventListener("click", resetForm);
+  $("refreshBtn").addEventListener("click", () => {
+    if (isAdmin(auth.currentUser)) startNewsListener();
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    clearMessage($("appMessage"));
+    if (user && isAdmin(user)) {
+      loginBox.classList.add("hidden");
+      dashboard.classList.remove("hidden");
+      $("headerUser").classList.remove("hidden");
+      $("userEmail").textContent = user.email;
+      startNewsListener();
+    } else {
+      if (unsubscribeNews) { unsubscribeNews(); unsubscribeNews = null; }
+      dashboard.classList.add("hidden");
+      $("headerUser").classList.add("hidden");
+      loginBox.classList.remove("hidden");
+      if (user && !isAdmin(user)) {
+        signOut(auth).catch(console.error);
+        showMessage($("loginMessage"), "यह Gmail Admin सूची में नहीं है।", "error");
+      }
+    }
+  });
+
+  updateTypeFields();
+</script>
+</body>
+</html>
